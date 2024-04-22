@@ -1,5 +1,6 @@
 import mysql.connector
-from mysql.connector import Error
+from mysql.connector import MySQLConnection, Error
+from configparser import ConfigParser
 
 class UserTable:
     def connect(self):
@@ -41,12 +42,47 @@ class UserTable:
         except Error as e:
             print(e)
 
-    def insert_user(self):
-        query = "INSERT INTO users(id,name) "
-        pass
+    def insert_user(self, id, name):
+        query = f"INSERT INTO users VALUES({id},\"{name}\")"
+
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(query)
+                self.connection.commit()
+                print('added')
+        except Error as e:
+            print(e)
+
+    def get_users(self):
+        select_movies_query = "SELECT * FROM users"
+        with self.connection.cursor() as cursor:
+            cursor.execute(select_movies_query)
+            result = cursor.fetchall()
+            for row in result:
+                print(row)
+    
+    def get_user_by_id(self, id):
+        select_movies_query = f"SELECT name FROM users WHERE id = {id}"
+        with self.connection.cursor() as cursor:
+            cursor.execute(select_movies_query)
+            result = cursor.fetchall()
+            for row in result:
+                print(row[0])
 
 if __name__ == '__main__':
     table = UserTable()
     table.connect()
+    #table.delete_user_table()
     table.create_user_table()
-    
+
+    while True:
+        request = input()
+        if request.split()[0] == "add":
+            table.insert_user(request.split()[1], request.split()[2])
+        elif request.split()[0] == "get":
+            table.get_users()
+        elif request.split()[0] == "getby":
+            table.get_user_by_id(request.split()[1])
+        else:
+            table.connection.close()
+            break
