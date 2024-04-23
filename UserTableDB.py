@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import MySQLConnection, Error
 from configparser import ConfigParser
 
-class UserTable:
+class UserTableDB:
     def connect(self):
         try:
             self.connection = mysql.connector.connect(host='localhost',
@@ -21,7 +21,11 @@ class UserTable:
     def create_user_table(self):
         create_movies_table_query = """
         CREATE TABLE users(
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id varchar(20) PRIMARY KEY,
+            location INT,
+            division INT,
+            departament INT,
+            team INT,
             name VARCHAR(100)
         )
         """
@@ -42,8 +46,8 @@ class UserTable:
         except Error as e:
             print(e)
 
-    def insert_user(self, id, name):
-        query = f"INSERT INTO users VALUES({id},\"{name}\")"
+    def insert_user(self, id,  name, location = 0, division = 0, departament = 0, team = 0):
+        query = f"INSERT INTO users(id, location, division, departament, team, name) VALUES(\"{id}\",{location}, {division}, {departament}, {team}, \"{name}\")"
 
         try:
             with self.connection.cursor() as cursor:
@@ -70,9 +74,9 @@ class UserTable:
                 print(row[0])
 
 if __name__ == '__main__':
-    table = UserTable()
+    table = UserTableDB()
     table.connect()
-    #table.delete_user_table()
+    table.delete_user_table()
     table.create_user_table()
 
     while True:
