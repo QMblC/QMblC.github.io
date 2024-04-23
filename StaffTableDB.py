@@ -1,10 +1,13 @@
 import mysql.connector
 from mysql.connector import MySQLConnection, Error
 from configparser import ConfigParser
+from Staff import Staff
 
-class UserTableDB:
+class StaffTableDB:
+
     def connect(self):
         try:
+
             self.connection = mysql.connector.connect(host='localhost',
                                         database='python_mysql',
                                         user='root',
@@ -22,11 +25,13 @@ class UserTableDB:
         create_movies_table_query = """
         CREATE TABLE users(
             id varchar(20) PRIMARY KEY,
-            location INT,
-            division INT,
-            departament INT,
-            team INT,
-            name VARCHAR(100)
+            location VARCHAR(100),
+            division VARCHAR(100),
+            departament VARCHAR(100),
+            team VARCHAR(100),
+            profession varchar(100),
+            name VARCHAR(100),
+            type varchar(100)
         )
         """
         try:
@@ -46,18 +51,21 @@ class UserTableDB:
         except Error as e:
             print(e)
 
-    def insert_user(self, id,  name, location = 0, division = 0, departament = 0, team = 0):
-        query = f"INSERT INTO users(id, location, division, departament, team, name) VALUES(\"{id}\",{location}, {division}, {departament}, {team}, \"{name}\")"
-
+    def insert_staff(self, staff: Staff):
+        if self.get_staff_by_id(staff.id).name != None:
+            return      
+         
+        query = f"INSERT INTO users(id, location, division, departament, team, name, profession, type) VALUES(\"{staff.id}\",\"{staff.location}\", \"{staff.division}\", \"{staff.departament}\", \"{staff.team}\", \"{staff.name}\", \"{staff.profession}\", \"{staff.type}\")"
+        
         try:
-            with self.connection.cursor() as cursor:
+   
+            with self.connection.cursor() as cursor: 
                 cursor.execute(query)
                 self.connection.commit()
-                print('added')
         except Error as e:
             print(e)
 
-    def get_users(self):
+    def get_staff(self):
         select_movies_query = "SELECT * FROM users"
         with self.connection.cursor() as cursor:
             cursor.execute(select_movies_query)
@@ -65,28 +73,42 @@ class UserTableDB:
             for row in result:
                 print(row)
     
-    def get_user_by_id(self, id):
-        select_movies_query = f"SELECT name FROM users WHERE id = {id}"
-        with self.connection.cursor() as cursor:
-            cursor.execute(select_movies_query)
-            result = cursor.fetchall()
-            for row in result:
-                print(row[0])
+    def get_staff_by_id(self, id) -> Staff:
+        try:
+            staff = Staff(None, None, None)
+            select_movies_query = f"SELECT * FROM users WHERE id = {id}"
+            with self.connection.cursor() as cursor:
+                cursor.execute(select_movies_query)
+                result = cursor.fetchall()
+                for row in result:
+                    staff = Staff(row[0].value, row[7].value, row[6].value)
+                    staff.set_location(row[2].value)
+                    staff.set_division(row[3].value)
+                    staff.set_departament(row[4].value)
+                    staff.set_team(row[5].value)
+                    staff.set_type(row[8].value)
+
+        except Error as e:
+            return Staff(None, None, None)
+        finally:
+            return staff
 
 if __name__ == '__main__':
-    table = UserTableDB()
+    
+    table = StaffTableDB()
+
     table.connect()
-    table.delete_user_table()
+    #table.delete_user_table()
     table.create_user_table()
 
     while True:
         request = input()
         if request.split()[0] == "add":
-            table.insert_user(request.split()[1], request.split()[2])
+            table.insert_staff(request.split()[1], request.split()[2])
         elif request.split()[0] == "get":
-            table.get_users()
+            table.get_staff()
         elif request.split()[0] == "getby":
-            table.get_user_by_id(request.split()[1])
+            print(table.get_staff_by_id(request.split()[1]).name)
         else:
             table.connection.close()
             break
