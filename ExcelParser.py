@@ -39,7 +39,5 @@ table.connect()
 table.delete_user_table()
 table.create_user_table()
 for i in a:
-
     ExcelParser.insert_staff_db(i)
-
     

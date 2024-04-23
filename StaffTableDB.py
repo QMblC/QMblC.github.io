@@ -76,22 +76,23 @@ class StaffTableDB:
     def get_staff_by_id(self, id) -> Staff:
         try:
             staff = Staff(None, None, None)
-            select_movies_query = f"SELECT * FROM users WHERE id = {id}"
+            select_movies_query = f"SELECT * FROM users WHERE id = \"{id}\""
             with self.connection.cursor() as cursor:
                 cursor.execute(select_movies_query)
                 result = cursor.fetchall()
                 for row in result:
-                    staff = Staff(row[0].value, row[7].value, row[6].value)
-                    staff.set_location(row[2].value)
-                    staff.set_division(row[3].value)
-                    staff.set_departament(row[4].value)
-                    staff.set_team(row[5].value)
-                    staff.set_type(row[8].value)
-
+                    staff = Staff(row[0], row[6], row[5])
+                    staff.set_location(row[1])
+                    staff.set_division(row[2])
+                    staff.set_departament(row[3])
+                    staff.set_team(row[4])
+                    staff.set_type(row[7])
+                
         except Error as e:
-            return Staff(None, None, None)
+            return staff
         finally:
             return staff
+
 
 if __name__ == '__main__':
     
