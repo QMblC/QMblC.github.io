@@ -1,7 +1,7 @@
 import mysql.connector
 from mysql.connector import MySQLConnection, Error
 from configparser import ConfigParser
-from Staff import Staff
+from Entities.Staff import Staff
 
 class StaffTableDB:
 
@@ -52,7 +52,7 @@ class StaffTableDB:
             print(e)
 
     def insert_staff(self, staff: Staff):
-        if self.get_staff_by_id(staff.id).name != None:
+        if self.contains(staff.id):
             return      
          
         query = f"INSERT INTO users(id, location, division, departament, team, name, profession, type) VALUES(\"{staff.id}\",\"{staff.location}\", \"{staff.division}\", \"{staff.departament}\", \"{staff.team}\", \"{staff.name}\", \"{staff.profession}\", \"{staff.type}\")"
@@ -64,6 +64,13 @@ class StaffTableDB:
                 self.connection.commit()
         except Error as e:
             print(e)
+
+    def contains(self, id):
+        select_movies_query = f"SELECT * FROM users WHERE id = \"{id}\""
+        with self.connection.cursor() as cursor:
+            cursor.execute(select_movies_query)
+            result = cursor.fetchall()
+            return len(result) > 0
 
     def get_staff(self):
         select_movies_query = "SELECT * FROM users"
@@ -92,6 +99,18 @@ class StaffTableDB:
             return staff
         finally:
             return staff
+        
+    def get_location_subgroups(self):
+        pass
+
+    def get_division_subgroups(self):
+        pass
+
+    def get_departament_subgroups(self):
+        pass
+
+    def get_staff_by_group(self):
+        pass
 
 
 if __name__ == '__main__':
@@ -110,6 +129,8 @@ if __name__ == '__main__':
             table.get_staff()
         elif request.split()[0] == "getby":
             print(table.get_staff_by_id(request.split()[1]).name)
+        elif request.split()[0] == "con":
+            table.contains(request.split()[1])
         else:
             table.connection.close()
             break

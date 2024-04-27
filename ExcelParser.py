@@ -1,6 +1,6 @@
 import openpyxl
 import openpyxl.worksheet
-from Staff import Staff
+from Entities.Staff import Staff
 from StaffTableDB import StaffTableDB
 
 class ExcelParser:
@@ -36,7 +36,7 @@ class ExcelParser:
 a = ExcelParser.get_rows("Tables/Structure.xlsx")
 table = StaffTableDB()
 table.connect()
-table.delete_user_table()
+#table.delete_user_table()
 table.create_user_table()
 for i in a:
     ExcelParser.insert_staff_db(i)
