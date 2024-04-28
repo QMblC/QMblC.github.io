@@ -100,17 +100,51 @@ class StaffTableDB:
         finally:
             return staff
         
-    def get_location_subgroups(self):
-        pass
+    def get_location_subgroups(self, name):
+        select_movies_query = f"SELECT DISTINCT division, departament, team FROM users WHERE location = \"{name}\""
+        with self.connection.cursor() as cursor:
+            cursor.execute(select_movies_query)
+            result = cursor.fetchall()
+            for row in result:
+                if row[0] != '':
+                    yield row[0]
+                elif row[0] == '' and row[1] != '':
+                    yield row[1]
+                else:
+                    yield row[2]
 
-    def get_division_subgroups(self):
-        pass
+    def get_division_subgroups(self, name):
+        select_movies_query = f"SELECT departament, team, id FROM users WHERE division = \"{name}\""
+        with self.connection.cursor() as cursor:
+            cursor.execute(select_movies_query)
+            result = cursor.fetchall()
+            for row in result:
+                if row[0] != 'None':
+                    yield row[0]
+                elif row[0] == 'None' and row[1] != 'None':
+                    yield row[1]
+                else:
+                    yield row[2]
 
-    def get_departament_subgroups(self):
-        pass
+    def get_departament_subgroups(self, name):
+        select_movies_query = f"SELECT team, id FROM users WHERE departament = \"{name}\""
+        with self.connection.cursor() as cursor:
+            cursor.execute(select_movies_query)
+            result = cursor.fetchall()
+            for row in result:
+                if row[0] != 'None':
+                    yield row[0]
+                else:
+                    yield row[1]
 
-    def get_staff_by_group(self):
-        pass
+    def get_staff_by_group(self, name):
+        select_movies_query = f"SELECT id FROM users WHERE team = \"{name}\""
+        with self.connection.cursor() as cursor:
+            cursor.execute(select_movies_query)
+            result = cursor.fetchall()
+            for row in result:
+                yield row[0]
+
 
 
 if __name__ == '__main__':

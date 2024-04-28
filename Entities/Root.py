@@ -7,6 +7,7 @@ class Root:
         if not(key in self.children):
             self.children[key] = value
 
+
     def get_child(self, key):
         if key in self.children:
             return self.children[key]

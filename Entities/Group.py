@@ -1,6 +1,6 @@
 from Entities.Root import Root
 
-class Location(Root):
+class Group(Root):
     def __init__(self, name) -> None:
         return super().__init__(name)
 
