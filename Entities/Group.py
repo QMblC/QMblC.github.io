@@ -9,3 +9,6 @@ class Group(Root):
 
     def get_child(self, key):
         return super().get_child(key)
+    
+    def toJSON(self):
+        return super().toJSON()

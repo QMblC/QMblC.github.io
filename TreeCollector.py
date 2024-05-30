@@ -6,12 +6,22 @@ from Entities.Location import Location
 from Entities.Departament import Departament
 from Entities.Division import Division
 from Entities.Group import Group
+from Entities.Main import Main
 
 
 class TreeCollector:
     def __init__(self) -> None:
         self.database = StaffTableDB()
         self.database.connect()
+
+    def get_locations(self):
+        root = Main("Брусника")
+        children = self.database.get_company_subgroups()
+        for child in children:
+            root.add_child(child[0], Location(child[0]))
+
+        return root
+
 
     def get_root(self, root_name: str) -> Root:
         root = self.determine_type(root_name)
@@ -42,13 +52,5 @@ class TreeCollector:
         elif splitted_name[0] == "Группа":
             return Group(root_name)
         
-tc = TreeCollector()
-root = tc.get_root("Брусника.Проектирование")
-b = tc.get_root(root.children["Подразделение \"Ахилл\""].name)
-root.children["Подразделение \"Ахилл\""] = b
-c = tc.get_root(b.children["Отдел \"Норвегия\""].name)
-root.children["Подразделение \"Ахилл\""].children["Отдел \"Норвегия\""] = c
-d = tc.get_root(c.children["Группа \"Рига\""].name)
-root.children["Подразделение \"Ахилл\""].children["Отдел \"Норвегия\""].children["Группа \"Рига\""] = d
-a = 0
+
         

@@ -13,3 +13,13 @@ class Root:
             return self.children[key]
         else:
             raise KeyError("Ключа нет")
+        
+    def toJSON(self):
+        j = []
+        for x in self.children:
+            a = {"children" : self.children[x].toJSON()}
+            j.append(a)
+        return {
+            "name" : self.name,
+            "children": j
+        }

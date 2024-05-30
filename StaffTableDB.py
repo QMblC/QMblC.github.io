@@ -126,6 +126,15 @@ class StaffTableDB:
                 else:
                     yield row[2]
 
+    def get_company_subgroups(self):
+        select_movies_query = f"SELECT DISTINCT location division, departament, team FROM users"
+        with self.connection.cursor() as cursor:
+            cursor.execute(select_movies_query)
+            result = cursor.fetchall()
+            for row in result:
+                yield row
+
+
     def get_departament_subgroups(self, name):
         select_movies_query = f"SELECT team, id FROM users WHERE departament = \"{name}\""
         with self.connection.cursor() as cursor:
