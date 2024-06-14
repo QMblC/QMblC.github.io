@@ -1,4 +1,4 @@
-from app.Entities.Root import Root
+from Entities.Root import Root
 
 class Group(Root):
     def __init__(self, name) -> None:

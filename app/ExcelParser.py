@@ -1,7 +1,7 @@
 import openpyxl
 import openpyxl.worksheet
-from app.Entities.Staff import Staff
-from app.StaffTableDB import StaffTableDB
+from Entities.Staff import Staff
+from DbHandler import DbHandler, UserDb
 
 class ExcelParser:
 
@@ -31,14 +31,8 @@ class ExcelParser:
 
     @staticmethod
     def insert_staff_db(staff: Staff):
-        table.insert_staff(staff)
+        DbHandler.UserHandlerDb.add_user(staff)
 
 
-a = ExcelParser.get_rows("app/Tables/Structure.xlsx")
-table = StaffTableDB()
-table.connect()
-#table.delete_user_table()
-table.create_user_table()
-for i in a:
-    ExcelParser.insert_staff_db(i)
+
     

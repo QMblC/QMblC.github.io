@@ -1,7 +1,9 @@
 class Root:
-    def __init__(self, name) -> None:
+    def __init__(self, path: str) -> None:
+        splitted = path.split('_')
         self.children = dict()
-        self.name = name
+        self.name = splitted[-1]
+        self.path = path
 
     def add_child(self, key, value):
         if not(key in self.children):

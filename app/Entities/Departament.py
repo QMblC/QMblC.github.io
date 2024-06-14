@@ -1,4 +1,4 @@
-from app.Entities.Root import Root
+from Entities.Root import Root
 
 class Departament(Root):
     def __init__(self, name) -> None:

@@ -1,4 +1,4 @@
-from app.Entities.Root import Root
+from Entities.Root import Root
 from flask import json
 
 class Main(Root):

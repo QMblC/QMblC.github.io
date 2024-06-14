@@ -7,34 +7,34 @@ class Staff:
         self.team = ""
         self.name = name
         self.profession = profession
-        self.type = ""
+        self.job_type = ""
 
     def set_location(self, value: str):
         if value == None:
             self.location = None
         else:
-            self.location = value.replace("\"", "\\\"")
+            self.location = value
 
     def set_division(self, value: str):
         if value == None:
             self.di = None
         else:
-            self.division = value.replace("\"", "\\\"")
+            self.division = value
 
     def set_departament(self, value: str):
         if value == None:
             self.departament = None
         else:
-            self.departament = value.replace("\"", "\\\"")  
+            self.departament = value
 
     def set_team(self, value: str):
         if value == None:
             self.team = None
         else:
-            self.team = value.replace("\"", "\\\"") 
+            self.team = value
 
     def set_type(self, value: str):
         if value == None:
-            self.type = None
+            self.job_type = None
         else:
-            self.type = value.replace("\"", "\\\"")
+            self.job_type = value
