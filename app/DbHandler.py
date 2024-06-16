@@ -26,6 +26,174 @@ class DbHandler:
                 user = db.session.query(UserDb).get(user_id)
                 return user
             
+        def get_locations_children():
+            with app.app_context():
+                locations = db.session.query(UserDb).with_entities(UserDb.location).distinct().all()
+
+                result = []
+
+                for location in locations:
+
+                    children = DbHandler.UserHandlerDb.get_children(db.session.query(UserDb).filter(UserDb.location == location[0]).with_entities(UserDb.division).distinct().all())
+
+                    line = {
+                        "name" : location[0],
+                        "parents" : {"root" : "Брусника"},
+                        "children" : children
+                    }
+
+                    result.append(line)
+
+                return result
+            
+        def get_divisions_children():
+            divisions = db.session.query(UserDb).with_entities(UserDb.division, UserDb.location).distinct().all()
+
+            result = []
+
+            for division in divisions:
+
+                children = DbHandler.UserHandlerDb.get_children(db.session.query(UserDb).filter(UserDb.division == division[0]).with_entities(UserDb.departament).distinct().all())
+
+                if division[0] == '':
+                    line = {
+                        "name" : "Отсутствует",
+                        "parents" : {"root" : "Брусника",
+                            "location" : division[1]
+                        },
+                        "children" : children
+                    }
+                else:
+                    line = {
+                        "name" : division[0],
+                        "parents" : {"root" : "Брусника",
+                            "location" : division[1]
+                        },
+                        "children" : children
+                    }
+
+                
+                flag = False
+                
+                for i in result:
+                    if i["name"] == line["name"]:
+                        flag = True
+                        break
+
+                if flag:
+                    continue
+                else:
+                    result.append(line)
+
+            return result
+            
+        def get_departments_children():
+            departments = db.session.query(UserDb).with_entities(UserDb.departament).distinct().all()
+
+            result = []
+
+            for department in departments:
+
+                children = DbHandler.UserHandlerDb.get_children(db.session.query(UserDb).filter(UserDb.departament == department[0]).with_entities(UserDb.team).distinct().all())
+
+                if department[0] == None:
+                    example = db.session.query(UserDb).filter(UserDb.departament == department[0]).first()
+                    ex_location = example.location if example.location else "Отсутствует"
+                    ex_division = example.division if example.division else "Отсутствует"
+                    line = {
+                        "name" : "Отсутствует",
+                        "parents" : {"root" : "Брусника",
+                            "location" : ex_location,
+                            "division" : ex_division,
+                        },
+                        "children" : children
+                    }
+                else:
+                    example = db.session.query(UserDb).filter(UserDb.departament == department[0]).first()
+                    ex_location = example.location if example.location else "Отсутствует"
+                    ex_division = example.division if example.division else "Отсутствует"
+                    line = {
+                        "name" : department[0],
+                        "parents" : {"root" : "Брусника",
+                            "location" : ex_location,
+                            "division" : ex_division,
+                        },
+                        "children" : children
+                    }
+                
+                flag = False
+                
+                for i in result:
+                    if i["name"] == line["name"]:
+                        flag = True
+                        break
+
+                if flag:
+                    continue
+                else:
+                    result.append(line)
+
+            return result
+        
+        def get_groups_children():
+            groups = db.session.query(UserDb).with_entities(UserDb.team).distinct().all()
+
+            result = []
+
+            for group in groups:
+
+                if group[0] == None:
+                    example = db.session.query(UserDb).filter(UserDb.team == group[0]).first()
+                    ex_location = example.location if example.location else "Отсутствует"
+                    ex_division = example.division if example.division else "Отсутствует"
+                    ex_department = example.departament if example.departament else "Отсутствует"
+                    line = {
+                        "name" : "Отсутствует",
+                        "parents" : {"root" : "Брусника",
+                            "location" : ex_location,
+                            "division" : ex_division,
+                            "department" : ex_department
+                        },
+                        "children" : []
+                    }
+                else:
+                    example = db.session.query(UserDb).filter(UserDb.team == group[0]).first()
+                    ex_location = example.location if example.location else "Отсутствует"
+                    ex_division = example.division if example.division else "Отсутствует"
+                    ex_department = example.departament if example.departament else "Отсутствует"
+                    line = {
+                        "name" : group[0],
+                        "parents" : {"root" : "Брусника",
+                            "location" : ex_location,
+                            "division" : ex_division,
+                            "department" : ex_department
+                        },
+                        "children" : []
+                    }
+                
+                flag = False
+                
+                for i in result:
+                    if i["name"] == line["name"]:
+                        flag = True
+                        break
+
+                if flag:
+                    continue
+                else:
+                    result.append(line)
+
+            return result
+
+        def get_children(arr):
+            children = []
+            for child in arr:
+                if child[0] == None or child[0] == '':
+                    children.append("Отсутствует")
+                else:
+                    children.append(child[0])
+            return children
+                
         def get_locations():
             with app.app_context():
                 

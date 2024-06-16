@@ -1,8 +1,7 @@
-
 from ExcelParser import DbHandler, ExcelParser, UserDb
 from Entities.Root import Root
 from Entities.Location import Location
-from Entities.Departament import Departament
+from Entities.Department import Department
 from Entities.Division import Division
 from Entities.Group import Group
 from Entities.Main import Main
@@ -22,7 +21,7 @@ class TreeCollector:
             children = DbHandler.UserHandlerDb.get_divisions(root)   
         elif root_type is Division:
             children = DbHandler.UserHandlerDb.get_departaments(root)    
-        elif root_type is Departament:
+        elif root_type is Department:
             pass
         elif root_type is Group:
             pass
@@ -45,9 +44,21 @@ class TreeCollector:
         elif "Подразделение" in name:
             return Division(path)
         elif "Отдел" in name:
-            return Departament(path)
+            return Department(path)
         elif "Группа" in name:
             return Group(path)
+        
+    def get_filter_data():
+
+        locations = []
+
+        return {
+                "locations" : DbHandler.UserHandlerDb.get_locations_children(),
+                "divisions" : DbHandler.UserHandlerDb.get_divisions_children(),
+                "departments" : DbHandler.UserHandlerDb.get_departments_children(),
+                "groups" : DbHandler.UserHandlerDb.get_groups_children()
+        }
+
         
 
         

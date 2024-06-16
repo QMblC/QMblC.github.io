@@ -1,6 +1,6 @@
 from Entities.Root import Root
 
-class Departament(Root):
+class Department(Root):
     def __init__(self, name) -> None:
         return super().__init__(name)
 
