@@ -11,54 +11,65 @@ class TreeCollector:
 
 
     def get_root(path: str) -> Root:
-        splitted_path = path.split('_')
-        root = TreeCollector.determine_type(path)
-        root_type = type(root)
+        splitted_path = TreeCollector.split_path(path)
 
-        if root_type is Main:
-            children = DbHandler.UserHandlerDb.get_locations()
-        elif root_type is Location:
-            children = DbHandler.UserHandlerDb.get_divisions(root)   
-        elif root_type is Division:
-            children = DbHandler.UserHandlerDb.get_departaments(root)    
-        elif root_type is Department:
-            pass
-        elif root_type is Group:
-            pass
-
-        for child in children:
-            root.add_child(child, root_type(child))
-
+        root = DbHandler.UserHandlerDb.get_root(splitted_path)
         return root
-
-    def determine_type(path: str) -> Root:
+    
+    def split_path(path: str):
         splitted_path = path.split('_')
-        name = splitted_path[-1]
+
+        result = {
+            "root" : None,
+            "location" : None,
+            "division" : '',
+            "department" : None,
+            "group" : None,
+            "destination" : None,
+            "person" : None
+        }
+
+        for index, name in enumerate(splitted_path):
+            data_type = TreeCollector.determine_type(name)
+            result[data_type] = name
+            if index == len(splitted_path) - 1:
+                result["destination"] = data_type
+
+        
+
+        return result
+
+
+    def determine_type(name: str) -> Root:
 
         if name == 'Брусника':
-            return Main(path)
+            return "root"
         elif '.' in name or name == "Дирекция" or name == "Штаб":
-            return Location(path)
+            return "location"
         elif len(name.split()) >= 2 and name.split()[1] == 'область':
-            return Location(path)
+            return "location"
         elif "Подразделение" in name:
-            return Division(path)
+            return "division"
         elif "Отдел" in name:
-            return Department(path)
+            return "department"
         elif "Группа" in name:
-            return Group(path)
+            return "group"
+        elif "БСЗ" in name:
+            return "person"
         
     def get_filter_data():
 
-        locations = []
-
         return {
-                "locations" : DbHandler.UserHandlerDb.get_locations_children(),
-                "divisions" : DbHandler.UserHandlerDb.get_divisions_children(),
-                "departments" : DbHandler.UserHandlerDb.get_departments_children(),
-                "groups" : DbHandler.UserHandlerDb.get_groups_children()
+                "locations" : DbHandler.UserHandlerDb.get_locations(),
+                "divisions" : DbHandler.UserHandlerDb.get_divisions(),
+                "departments" : DbHandler.UserHandlerDb.get_departments(),
+                "groups" : DbHandler.UserHandlerDb.get_groups()
         }
+    
+    def get_path():
+        return DbHandler.UserHandlerDb.get_path("отдел", "Отдел \"Бельгия\"")
+   
 
-        
 
+     
         

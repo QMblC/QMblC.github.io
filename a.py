@@ -12,7 +12,7 @@ def aaa():#+ids
                 {
                     "name": "west",
                     "info": {
-                        "people" : "person1",
+                        "people" : "123",
                         "boss" : "boss1"
                     },
                     "path-to-children": "/api/second"

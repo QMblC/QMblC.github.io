@@ -26,116 +26,41 @@ class DbHandler:
                 user = db.session.query(UserDb).get(user_id)
                 return user
             
-        def get_locations_children():
+        def get_locations():
             with app.app_context():
-                locations = db.session.query(UserDb).with_entities(UserDb.location).distinct().all()
+                locations = [x[0] for x in db.session.query(UserDb).with_entities(UserDb.location).distinct().all()]
 
-                result = []
-
-                for location in locations:
-
-                    children = DbHandler.UserHandlerDb.get_children(db.session.query(UserDb).filter(UserDb.location == location[0]).with_entities(UserDb.division).distinct().all())
-
-                    line = {
-                        "name" : location[0],
-                        "parents" : {"root" : "Брусника"},
-                        "children" : children
-                    }
-
-                    result.append(line)
-
-                return result
+                return locations
             
-        def get_divisions_children():
-            divisions = db.session.query(UserDb).with_entities(UserDb.division, UserDb.location).distinct().all()
+        def get_divisions():
+            divisions = db.session.query(UserDb).with_entities(UserDb.division).distinct().all()
 
             result = []
 
             for division in divisions:
-
-                children = DbHandler.UserHandlerDb.get_children(db.session.query(UserDb).filter(UserDb.division == division[0]).with_entities(UserDb.departament).distinct().all())
-
+     
                 if division[0] == '':
-                    line = {
-                        "name" : "Отсутствует",
-                        "parents" : {"root" : "Брусника",
-                            "location" : division[1]
-                        },
-                        "children" : children
-                    }
+                    result.append("Отсутствует")
                 else:
-                    line = {
-                        "name" : division[0],
-                        "parents" : {"root" : "Брусника",
-                            "location" : division[1]
-                        },
-                        "children" : children
-                    }
-
-                
-                flag = False
-                
-                for i in result:
-                    if i["name"] == line["name"]:
-                        flag = True
-                        break
-
-                if flag:
-                    continue
-                else:
-                    result.append(line)
+                    result.append(division[0])
 
             return result
             
-        def get_departments_children():
+        def get_departments():
             departments = db.session.query(UserDb).with_entities(UserDb.departament).distinct().all()
 
             result = []
 
-            for department in departments:
-
-                children = DbHandler.UserHandlerDb.get_children(db.session.query(UserDb).filter(UserDb.departament == department[0]).with_entities(UserDb.team).distinct().all())
+            for department in departments:          
 
                 if department[0] == None:
-                    example = db.session.query(UserDb).filter(UserDb.departament == department[0]).first()
-                    ex_location = example.location if example.location else "Отсутствует"
-                    ex_division = example.division if example.division else "Отсутствует"
-                    line = {
-                        "name" : "Отсутствует",
-                        "parents" : {"root" : "Брусника",
-                            "location" : ex_location,
-                            "division" : ex_division,
-                        },
-                        "children" : children
-                    }
+                    result.append("Отсутствует")
                 else:
-                    example = db.session.query(UserDb).filter(UserDb.departament == department[0]).first()
-                    ex_location = example.location if example.location else "Отсутствует"
-                    ex_division = example.division if example.division else "Отсутствует"
-                    line = {
-                        "name" : department[0],
-                        "parents" : {"root" : "Брусника",
-                            "location" : ex_location,
-                            "division" : ex_division,
-                        },
-                        "children" : children
-                    }
-                
-                flag = False
-                
-                for i in result:
-                    if i["name"] == line["name"]:
-                        flag = True
-                        break
-
-                if flag:
-                    continue
-                else:
-                    result.append(line)
+                    result.append(department[0])
 
             return result
         
-        def get_groups_children():
+        def get_groups():
             groups = db.session.query(UserDb).with_entities(UserDb.team).distinct().all()
 
             result = []
@@ -143,113 +68,406 @@ class DbHandler:
             for group in groups:
 
                 if group[0] == None:
-                    example = db.session.query(UserDb).filter(UserDb.team == group[0]).first()
-                    ex_location = example.location if example.location else "Отсутствует"
-                    ex_division = example.division if example.division else "Отсутствует"
-                    ex_department = example.departament if example.departament else "Отсутствует"
-                    line = {
-                        "name" : "Отсутствует",
-                        "parents" : {"root" : "Брусника",
-                            "location" : ex_location,
-                            "division" : ex_division,
-                            "department" : ex_department
-                        },
-                        "children" : []
-                    }
+                    result.append("Отсутствует")
                 else:
-                    example = db.session.query(UserDb).filter(UserDb.team == group[0]).first()
-                    ex_location = example.location if example.location else "Отсутствует"
-                    ex_division = example.division if example.division else "Отсутствует"
-                    ex_department = example.departament if example.departament else "Отсутствует"
-                    line = {
-                        "name" : group[0],
-                        "parents" : {"root" : "Брусника",
-                            "location" : ex_location,
-                            "division" : ex_division,
-                            "department" : ex_department
-                        },
-                        "children" : []
-                    }
-                
-                flag = False
-                
-                for i in result:
-                    if i["name"] == line["name"]:
-                        flag = True
-                        break
-
-                if flag:
-                    continue
-                else:
-                    result.append(line)
+                    result.append(group[0])
 
             return result
 
-        def get_children(arr):
-            children = []
-            for child in arr:
-                if child[0] == None or child[0] == '':
-                    children.append("Отсутствует")
+        def get_path(data_type: str, data: str):
+            if data_type == "локация":
+                request = db.session.query(UserDb).filter(UserDb.location == data)
+                divisions = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.division).distinct().all())
+                departments = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.departament).distinct().all())
+                groups = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.team).distinct().all())
+
+                return{
+                    "locations" : data,
+                    "divisions" : divisions,
+                    "departments" : departments,
+                    "groups" : groups
+                }
+            elif data_type == "подразделение":
+                request = db.session.query(UserDb).filter(UserDb.division == data)
+                departments = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.departament).distinct().all())
+                locations = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.location).distinct().all())
+                groups = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.team).distinct().all())
+
+                return{
+                    "departments" : departments,
+                    "divisions" : data,
+                    "locations" : locations,
+                    "groups" : groups
+                }
+            elif data_type == "отдел":
+                request = db.session.query(UserDb).filter(UserDb.departament == data)
+                divisions = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.division).distinct().all())
+                locations = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.location).distinct().all())
+                groups = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.team).distinct().all())
+
+                return{
+                    "divisions" : divisions,
+                    "departments" : data,
+                    "locations" : locations,
+                    "groups" : groups
+                }
+            elif data_type == "группа":
+                request = db.session.query(UserDb).filter(UserDb.team == data)
+                divisions = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.division).distinct().all())
+                locations = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.location).distinct().all())
+                departments = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.departament).distinct().all())
+
+                return{
+                    "divisions" : divisions,
+                    "locations" : locations,
+                    "groups" : data,
+                    "departments" : departments
+                }
+            
+        def fill_arr(arr):
+            result = []
+            for i in arr:
+                if i[0] == '' or i[0] == None:
+                    result.append("Отсутствует")
                 else:
-                    children.append(child[0])
-            return children
-                
-        def get_locations():
-            with app.app_context():
-                
-                location_query = db.session.query(UserDb)
-
-                locations = [x[0] for x in location_query.with_entities(UserDb.location).distinct().all()]
-
-                return locations
+                    result.append(i[0])
             
-        def get_divisions(root: Root):
-            with app.app_context():
+            return result
+        
+        def get_root(path: dict):
+            query = db.session.query(UserDb)
 
-                location_name = root.name
+            if path["destination"] == "root":
 
-                division_query = db.session.query(UserDb).filter(UserDb.location == location_name)
+                result = DbHandler.UserHandlerDb.get_root_children(path, query)
 
-                a = division_query.all()
+                return result
 
-                divisions = [x[0] for x in division_query.with_entities(UserDb.division).distinct().all() if (x[0] != '' and x[0] != None)]
+            elif path["destination"] == "location":
+                query = query.filter(UserDb.location == path["location"])
 
-                for div in division_query.filter(UserDb.division == '').with_entities(UserDb.departament).distinct().all():
-                    if (div[0] != '' and div[0] != None):
-                        divisions.append(div[0])
+                result = DbHandler.UserHandlerDb.get_location_children(path, query)
 
-                for dep in division_query.filter(UserDb.division == '')\
-                    .filter(UserDb.departament == None).with_entities(UserDb.team).distinct().all():
-                    if (dep[0] != None):
-                        divisions.append(dep[0])
-                
-                for line in division_query.filter(UserDb.division == '')\
-                    .filter(UserDb.departament == None)\
-                    .filter(UserDb.team == None).all():
-                    if (line.team == None):
-                        divisions.append(line.id)
-
-                return divisions
+                return result
             
-        def get_departaments(root: Root):
+            elif path["destination"] == "division":
+                query = query.filter(UserDb.location == path["location"]).filter(UserDb.division == path["division"])
+
+                result = DbHandler.UserHandlerDb.get_division_children(path, query)
+
+                return result
             
-            with app.app_context():
+            elif path["destination"] == "department":
+                query = query.filter(UserDb.location == path["location"]).filter(UserDb.division == path["division"]).filter(UserDb.departament == path["department"])
 
-                division_name = root.name
-                location_name = root.path.split('_')[1]
+                result = DbHandler.UserHandlerDb.get_department_children(path, query)
+
+                return result
+            
+            elif path["destination"] == "group":
+                query = query.filter(UserDb.location == path["location"]).filter(UserDb.division == path["division"])\
+                    .filter(UserDb.departament == path["department"]).filter(UserDb.team == path["group"])
                 
-                departament_query = db.session.query(UserDb).filter(UserDb.location == location_name).filter(UserDb.division == division_name)
+                result = DbHandler.UserHandlerDb.get_group_children(path, query)
 
-                a = departament_query.all()
+                return result
+            
+            elif path["destination"] == "person":
+                person = query.get(path["person"])
 
-                departaments = [x[0] for x in departament_query.with_entities(UserDb.departament).distinct().all() if x[0] != None]
+                current_path = f"/api/get-root/{path['root']}_{path['location']}_"
 
-                for dep in departament_query.filter(UserDb.departament == None).with_entities(UserDb.team).distinct().all():
-                    if (dep[0] != None):
-                        departaments.append(dep[0])
+                if path["division"] != '':
+                    current_path += f"{path['division']}_"
+                if path["department"] != None:
+                    current_path += f"{path['department']}_"
+                if path["group"] != None:
+                    current_path += f"{path['group']}_"
 
-                for id in departament_query.filter(UserDb.departament == None).filter(UserDb.team == None).with_entities(UserDb.id).distinct().all():
-                    if (id[0] != None):
-                        departaments.append(id[0])
+                current_path += path["person"]
 
-                return departaments
+                result = {
+                    "id" : person.id,
+                    "name": person.name,
+                    "profession": person.profession,
+                    "type": person.job_type,
+                    "children": [],
+                    "path" : current_path
+                }
+
+                return result
+
+
+        def get_root_children(path: str, query):
+            locations = [x[0] for x in query.with_entities(UserDb.location).distinct().all()]
+
+            result = {
+                "name" : path["root"],
+                "path" : f"/api/get-root/{path['root']}",
+                "children" : []
+            }
+
+            for location in locations:
+                location_query = db.session.query(UserDb).filter(UserDb.location == location)
+
+                people_amount = len(location_query.all())
+
+                divisions = location_query.with_entities(UserDb.division).distinct().all()
+                division_amount = len([x[0] for x in divisions if x[0] != None and x[0] != ''])
+
+                departments = location_query.with_entities(UserDb.departament).distinct().all()
+                department_amount = len([x[0] for x in departments if x[0] != None] )
+
+                groups = location_query.with_entities(UserDb.team).distinct().all()
+                group_amount = len([x[0] for x in groups if x[0] != None])
+
+                child = {
+                    "name" : location,
+                    "info" : {
+                        "people" : people_amount,
+                        "divisions" : division_amount,
+                        "departments" : department_amount,
+                        "groups" : group_amount
+                    },
+                    "path-to-children" : f"/api/get-root/{path['root']}_{location}"
+                }
+
+                result["children"].append(child)
+            
+            return result
+
+        def get_location_children(path: str, query):
+            divisions = [x[0] for x in query.with_entities(UserDb.division).distinct().all() if x[0] != None and x[0] != '']
+
+            result = {
+                "name" : path["location"],
+                "path" : f"/api/get-root/{path['root']}_{path['location']}",
+                "children" : []
+            }
+
+            for division in divisions:
+                division_query = query.filter(UserDb.division == division)
+
+                people_amount = len(division_query.all())
+
+                departments = division_query.with_entities(UserDb.departament).distinct().all()
+                department_amount = len([x[0] for x in departments if x[0] != None] )
+
+                groups = division_query.with_entities(UserDb.team).distinct().all()
+                group_amount = len([x[0] for x in groups if x[0] != None])
+
+                child = {
+                    "name" : division,
+                    "info" : {
+                        "people" : people_amount,
+                        "divisions" : None,
+                        "departments" : department_amount,
+                        "groups" : group_amount
+                    },
+                    "path-to-children" : f"{result['path']}_{division}"
+                }
+
+                result["children"].append(child)
+            
+            remaining_departments = [x[0] for x in query.filter(UserDb.division == '').with_entities(UserDb.departament).distinct().all() if x[0] != None and x[0] != '']
+
+            for department in remaining_departments:
+                department_query = query.filter(UserDb.division == '').filter(UserDb.departament == department)
+
+                people_amount = len(department_query.all())
+
+                groups = department_query.with_entities(UserDb.team).distinct().all()
+                group_amount = len([x[0] for x in groups if x[0] != None])
+
+                child = {
+                    "name" : department,
+                    "info" : {
+                        "people" : people_amount,
+                        "divisions" : None,
+                        "departments" : None,
+                        "groups" : group_amount
+                    },
+                    "path-to-children" : f"{result['path']}_{department}"
+                }
+
+                result["children"].append(child)
+            
+            remaining_groups = [x[0] for x in query.filter(UserDb.division == '').filter(UserDb.departament == None).with_entities(UserDb.team).distinct().all() if x[0] != None]
+            
+            for group in remaining_groups:
+                group_query = query.filter(UserDb.division == '').filter(UserDb.departament == None).filter(UserDb.team == group)
+
+                people_amount = len(group_query.all())
+
+                child = {
+                    "name" : group,
+                    "info" : {
+                        "people" : people_amount,
+                        "divisions" : None,
+                        "departments" : None,
+                        "groups" : None
+                    },
+                    "path-to-children" : f"{result['path']}_{group}"
+                }
+
+                result["children"].append(child)
+
+            remaining_people = query.filter(UserDb.division == '').filter(UserDb.departament == None).filter(UserDb.team == None).with_entities(UserDb.id).distinct().all()
+            
+            for person in remaining_people:
+
+                child = {
+                    "name" : person[0],
+                    "info" : {
+                        "people" : None,
+                        "divisions" : None,
+                        "departments" : None,
+                        "groups" : None
+                    },
+                    "path-to-children" : f"{result['path']}_{person[0]}"
+                }
+
+                result["children"].append(child)
+
+            return result
+        
+        def get_division_children(path: str, query):
+            departments = [x[0] for x in query.with_entities(UserDb.departament).distinct().all() if x[0] != None and x[0] != '']
+
+            current_path = f"/api/get-root/{path['root']}_{path['location']}_{path['division']}"
+
+            result = {
+                "name": path["division"],
+                "path" : current_path,
+                "children" : []
+            }
+
+            for department in departments:
+                department_query = query.filter(UserDb.departament == department)
+
+                people_amount = len(department_query.all())
+
+                groups = department_query.with_entities(UserDb.team).distinct().all()
+                group_amount = len([x[0] for x in groups if x[0] != None])
+
+                child = {
+                    "name" : department,
+                    "info" : {
+                        "people" : people_amount,
+                        "divisions" : None,
+                        "departments" : None,
+                        "groups" : group_amount
+                    },
+                    "path-to-children" : f"{result['path']}_{department}"
+                }
+
+                result["children"].append(child)
+
+            remaining_groups = [x[0] for x in query.filter(UserDb.departament == None).with_entities(UserDb.team).distinct().all() if x[0] != None]
+            
+            for group in remaining_groups:
+                group_query = query.filter(UserDb.departament == None).filter(UserDb.team == group)
+
+                people_amount = len(group_query.all())
+
+                child = {
+                    "name" : group,
+                    "info" : {
+                        "people" : people_amount,
+                        "divisions" : None,
+                        "departments" : None,
+                        "groups" : None
+                    },
+                    "path-to-children" : f"{result['path']}_{group}"
+                }
+
+                result["children"].append(child)
+
+            remaining_people = query.filter(UserDb.departament == None).filter(UserDb.team == None).with_entities(UserDb.id).distinct().all()
+        
+            for person in remaining_people:
+
+                child = {
+                    "name" : person[0],
+                    "info" : {
+                        "people" : None,
+                        "divisions" : None,
+                        "departments" : None,
+                        "groups" : None
+                    },
+                    "path-to-children" : f"{result['path']}_{person[0]}"
+                }
+
+                result["children"].append(child)
+
+            return result
+        
+        def get_department_children(path: str, query):
+            if path["division"] == '':
+                current_path = f"/api/get-root/{path['root']}_{path['location']}_{path['department']}"
+            else:
+                current_path = f"/api/get-root/{path['root']}_{path['location']}_{path['division']}_{path['department']}"
+
+            result = {
+                "name": path["department"],
+                "path" : current_path,
+                "children" : []
+            }
+
+            groups = [x[0] for x in query.with_entities(UserDb.team).distinct().all() if x[0] != None and x[0] != '']
+
+            for group in groups:
+                department_query = query.filter(UserDb.team == group)
+
+                people_amount = len(department_query.all())
+
+                child = {
+                    "name" : group,
+                    "info" : {
+                        "people" : people_amount,
+                        "divisions" : None,
+                        "departments" : None,
+                        "groups" : None
+                    },
+                    "path-to-children" : f"{result['path']}_{group}"
+                }
+
+                result["children"].append(child)
+
+            return result
+        
+        def get_group_children(path: str, query):
+            current_path = f"/api/get-root/{path['root']}_{path['location']}_"
+
+            if path["division"] != '':
+                current_path += f"{path['division']}_"
+            if path["department"] != None:
+                current_path += f"{path['department']}_"
+            
+            current_path += path["group"]
+
+            result = {
+                "name": path["group"],
+                "path" : current_path,
+                "children" : []
+            }
+
+            people = [x[0] for x in query.with_entities(UserDb.id).distinct().all() if x[0] != None and x[0] != '']
+
+            for person in people:
+                child = {
+                    "name" : person,
+                    "info" : {
+                        "people" : None,
+                        "divisions" : None,
+                        "departments" : None,
+                        "groups" : None
+                    },
+                    "path-to-children" : f"{result['path']}_{person}"
+                }
+
+                result["children"].append(child)
+
+            return result     
+
+
