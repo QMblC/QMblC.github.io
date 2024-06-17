@@ -66,8 +66,8 @@ class TreeCollector:
                 "groups" : DbHandler.UserHandlerDb.get_groups()
         }
     
-    def get_path():
-        return DbHandler.UserHandlerDb.get_path("отдел", "Отдел \"Бельгия\"")
+    def get_path(data_type: str, name: str):
+        return DbHandler.UserHandlerDb.get_path(data_type, name)
    
 
 

@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 import os
 
 from cfg import app
@@ -9,6 +10,7 @@ from TreeCollector import TreeCollector, ExcelParser, UserDb
 #Доделать распределение determine_type
 #Генерить id для каждого элемента
 
+CORS(app)
 
 @app.route('/')
 def main():
@@ -25,18 +27,17 @@ def get_filter_data():
     a = TreeCollector.get_filter_data()
     return jsonify(a)
 
-@app.route('/api/get-path')
+@app.route('/api/get-path', methods = ['POST'])
 def get_path():
-    #data_type = request.json['id']
-    #name = request['name']
-    a = TreeCollector.get_path()
+    data_type = request.json['id']
+    name = request.json['name']
+    a = TreeCollector.get_path(data_type, name)
     return a
 
 @app.route('/test/1_2_3_4')
 def tes():
     return "yes"
 
-app.run(host="0.0.0.0")
 
 #UserDb.delete_table()
 #UserDb.create_table()
@@ -45,4 +46,7 @@ app.run(host="0.0.0.0")
 
 #for i in a:
     #ExcelParser.insert_staff_db(i)
+
+app.run(host="0.0.0.0")
+
 

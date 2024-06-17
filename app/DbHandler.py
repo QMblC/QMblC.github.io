@@ -75,44 +75,54 @@ class DbHandler:
             return result
 
         def get_path(data_type: str, data: str):
-            if data_type == "локация":
+            if data_type == "locations":
+                
                 request = db.session.query(UserDb).filter(UserDb.location == data)
                 divisions = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.division).distinct().all())
                 departments = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.departament).distinct().all())
                 groups = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.team).distinct().all())
 
                 return{
-                    "locations" : data,
+                    "locations" : [data],
                     "divisions" : divisions,
                     "departments" : departments,
                     "groups" : groups
                 }
-            elif data_type == "подразделение":
-                request = db.session.query(UserDb).filter(UserDb.division == data)
+            elif data_type == "divisions":
+                if data == "Отсутствует":   
+                    request = db.session.query(UserDb).filter(UserDb.division == "")
+                else:
+                    request = db.session.query(UserDb).filter(UserDb.division == data)
                 departments = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.departament).distinct().all())
                 locations = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.location).distinct().all())
                 groups = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.team).distinct().all())
 
                 return{
                     "departments" : departments,
-                    "divisions" : data,
+                    "divisions" : [data],
                     "locations" : locations,
                     "groups" : groups
                 }
-            elif data_type == "отдел":
-                request = db.session.query(UserDb).filter(UserDb.departament == data)
+            elif data_type == "departments":
+                if data == "Отсутствует":   
+                    request = db.session.query(UserDb).filter(UserDb.departament == None)
+                else:
+                    request = db.session.query(UserDb).filter(UserDb.departament == data)
                 divisions = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.division).distinct().all())
                 locations = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.location).distinct().all())
                 groups = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.team).distinct().all())
 
                 return{
                     "divisions" : divisions,
-                    "departments" : data,
+                    "departments" : [data],
                     "locations" : locations,
                     "groups" : groups
                 }
-            elif data_type == "группа":
-                request = db.session.query(UserDb).filter(UserDb.team == data)
+            elif data_type == "groups":
+                if data == "Отсутствует":   
+                    request = db.session.query(UserDb).filter(UserDb.team == None)
+                else:
+                    request = db.session.query(UserDb).filter(UserDb.team == data)
                 divisions = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.division).distinct().all())
                 locations = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.location).distinct().all())
                 departments = DbHandler.UserHandlerDb.fill_arr(request.with_entities(UserDb.departament).distinct().all())
@@ -120,7 +130,7 @@ class DbHandler:
                 return{
                     "divisions" : divisions,
                     "locations" : locations,
-                    "groups" : data,
+                    "groups" : [data],
                     "departments" : departments
                 }
             

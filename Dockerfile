@@ -32,6 +32,7 @@ RUN pip install mysql-connector-python
 RUN pip install openpyxl
 RUN pip install packaging
 RUN pip install Werkzeug
+RUN pip install flask-cors
 
 
 
