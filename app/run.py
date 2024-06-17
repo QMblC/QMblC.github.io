@@ -39,13 +39,13 @@ def tes():
     return "yes"
 
 
-#UserDb.delete_table()
-#UserDb.create_table()
+UserDb.delete_table()
+UserDb.create_table()
 
-#a = ExcelParser.get_rows("app/Tables/Structure.xlsx")
+a = ExcelParser.get_rows("Structure.xlsx")#для докер удалить app
 
-#for i in a:
-    #ExcelParser.insert_staff_db(i)
+for i in a:
+    ExcelParser.insert_staff_db(i)
 
 app.run(host="0.0.0.0")
 

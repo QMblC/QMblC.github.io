@@ -15,11 +15,17 @@ class UserDb(db.Model):
     
     def create_table():
         with app.app_context():
-            db.create_all()
+            try:
+                db.create_all()
+            except:
+                pass
 
     def delete_table():
         with app.app_context():
-            db.drop_all()
+            try:
+                db.drop_all()
+            except:
+                pass
 
 with app.app_context():
     db.create_all()

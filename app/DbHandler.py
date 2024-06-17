@@ -169,6 +169,8 @@ class DbHandler:
             
             elif path["destination"] == "department":
                 query = query.filter(UserDb.location == path["location"]).filter(UserDb.division == path["division"]).filter(UserDb.departament == path["department"])
+                
+                test = query.all()
 
                 result = DbHandler.UserHandlerDb.get_department_children(path, query)
 
@@ -239,6 +241,7 @@ class DbHandler:
                         "departments" : department_amount,
                         "groups" : group_amount
                     },
+                    "is_person" : False,
                     "path-to-children" : f"/api/get-root/{path['root']}_{location}"
                 }
 
@@ -274,6 +277,7 @@ class DbHandler:
                         "departments" : department_amount,
                         "groups" : group_amount
                     },
+                    "is_person" : False,
                     "path-to-children" : f"{result['path']}_{division}"
                 }
 
@@ -297,6 +301,7 @@ class DbHandler:
                         "departments" : None,
                         "groups" : group_amount
                     },
+                    "is_person" : False,
                     "path-to-children" : f"{result['path']}_{department}"
                 }
 
@@ -317,24 +322,29 @@ class DbHandler:
                         "departments" : None,
                         "groups" : None
                     },
+                    "is_person" : False,
                     "path-to-children" : f"{result['path']}_{group}"
                 }
 
                 result["children"].append(child)
 
-            remaining_people = query.filter(UserDb.division == '').filter(UserDb.departament == None).filter(UserDb.team == None).with_entities(UserDb.id).distinct().all()
+            remaining_people = query.filter(UserDb.division == '').filter(UserDb.departament == None).filter(UserDb.team == None).all()
             
             for person in remaining_people:
-
+                
                 child = {
-                    "name" : person[0],
+                    "name" : person.name,
                     "info" : {
                         "people" : None,
                         "divisions" : None,
                         "departments" : None,
-                        "groups" : None
+                        "groups" : None,
+                        "id" : person.id,
+                        "profession": person.profession,
+                        "type": person.job_type
                     },
-                    "path-to-children" : f"{result['path']}_{person[0]}"
+                    "is_person" : True,
+                    "path-to-children" : f"{result['path']}_{person.name}"
                 }
 
                 result["children"].append(child)
@@ -368,6 +378,7 @@ class DbHandler:
                         "departments" : None,
                         "groups" : group_amount
                     },
+                    "is_person" : False,
                     "path-to-children" : f"{result['path']}_{department}"
                 }
 
@@ -388,24 +399,29 @@ class DbHandler:
                         "departments" : None,
                         "groups" : None
                     },
+                    "is_person" : False,
                     "path-to-children" : f"{result['path']}_{group}"
                 }
 
                 result["children"].append(child)
 
-            remaining_people = query.filter(UserDb.departament == None).filter(UserDb.team == None).with_entities(UserDb.id).distinct().all()
+            remaining_people = query.filter(UserDb.departament == None).filter(UserDb.team == None).all()
         
             for person in remaining_people:
 
                 child = {
-                    "name" : person[0],
+                    "name" : person.name,
                     "info" : {
                         "people" : None,
                         "divisions" : None,
                         "departments" : None,
-                        "groups" : None
+                        "groups" : None,
+                        "id" : person.id,
+                        "profession": person.profession,
+                        "type": person.job_type
                     },
-                    "path-to-children" : f"{result['path']}_{person[0]}"
+                    "is_person" : True,
+                    "path-to-children" : f"{result['path']}_{person.name}"
                 }
 
                 result["children"].append(child)
@@ -413,6 +429,8 @@ class DbHandler:
             return result
         
         def get_department_children(path: str, query):
+            a = query.all()
+
             if path["division"] == '':
                 current_path = f"/api/get-root/{path['root']}_{path['location']}_{path['department']}"
             else:
@@ -427,9 +445,9 @@ class DbHandler:
             groups = [x[0] for x in query.with_entities(UserDb.team).distinct().all() if x[0] != None and x[0] != '']
 
             for group in groups:
-                department_query = query.filter(UserDb.team == group)
+                group_query = query.filter(UserDb.team == group)
 
-                people_amount = len(department_query.all())
+                people_amount = len(group_query.all())
 
                 child = {
                     "name" : group,
@@ -439,7 +457,29 @@ class DbHandler:
                         "departments" : None,
                         "groups" : None
                     },
+                    "is_person" : False,
                     "path-to-children" : f"{result['path']}_{group}"
+                }
+
+                result["children"].append(child)
+
+            remaining_people = query.filter(UserDb.team == None).all()
+        
+            for person in remaining_people:
+
+                child = {
+                    "name" : person.name,
+                    "info" : {
+                        "people" : None,
+                        "divisions" : None,
+                        "departments" : None,
+                        "groups" : None,
+                        "id" : person.id,
+                        "profession": person.profession,
+                        "type": person.job_type
+                    },
+                    "is_person" : True,
+                    "path-to-children" : f"{result['path']}_{person.name}"
                 }
 
                 result["children"].append(child)
@@ -462,18 +502,22 @@ class DbHandler:
                 "children" : []
             }
 
-            people = [x[0] for x in query.with_entities(UserDb.id).distinct().all() if x[0] != None and x[0] != '']
+            people = query.all()
 
             for person in people:
                 child = {
-                    "name" : person,
+                    "name" : person.name,
                     "info" : {
                         "people" : None,
                         "divisions" : None,
                         "departments" : None,
-                        "groups" : None
+                        "groups" : None,
+                        "id" : person.id,
+                        "profession": person.profession,
+                        "type": person.job_type
                     },
-                    "path-to-children" : f"{result['path']}_{person}"
+                    "is_person" : True,
+                    "path-to-children" : f"{result['path']}_{person.name}"
                 }
 
                 result["children"].append(child)

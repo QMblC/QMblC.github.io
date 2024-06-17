@@ -28,19 +28,17 @@ RUN pip install gunicorn
 RUN pip install itsdangerous
 RUN pip install Jinja2
 RUN pip install MarkupSafe
-RUN pip install mysql-connector-python
+RUN pip install flask-sqlalchemy
 RUN pip install openpyxl
 RUN pip install packaging
 RUN pip install Werkzeug
 RUN pip install flask-cors
 
-
-
 # Копируем остальные файлы приложения
 #COPY . .
 
 # Открываем порт, на котором будет работать приложение
-EXPOSE 5000
+EXPOSE 8080
 
 # Команда для запуска приложения
-CMD ["python", "run.py"]
+CMD ["gunicorn", "-w", "4", "run:app"]
