@@ -41,4 +41,4 @@ RUN pip install flask-cors
 EXPOSE 8080
 
 # Команда для запуска приложения
-CMD ["gunicorn", "-w", "4", "run:app"]
+CMD ["python", "run.py"]
